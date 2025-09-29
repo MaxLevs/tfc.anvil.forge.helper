@@ -1,0 +1,89 @@
+name: Project Build
+run-name: "📦 Project Build #${{ github.run_number }}"
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEV_ENVIRONMENT: ${{ github.ref_name != 'main' }}
+
+jobs:
+  info:
+    name: 🖥️ Project Info
+    runs-on: ubuntu-latest
+    outputs:
+      project_version: ${{ steps.check.outputs.project_version }}
+      project_name: ${{ steps.check.outputs.project_name }}
+      project_full_name: ${{ steps.check.outputs.project_name }}-${{ steps.check.outputs.project_version }}
+
+    steps:
+      - name: 📦 Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: 📈 Get latest tag
+        id: latest_tag
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0 origin/main)
+          if [ -z "$tag" ]; then
+            echo "❌ Latest tag not found" && exit 1
+          else
+            echo "✔️ Latest tag found: $tag"
+            echo "tag=$tag" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🔍 Check
+        id: check
+        shell: bash
+        run: |
+
+          PROJECT_NAME=${{ github.event.repository.name }}
+
+          if ${{ env.DEV_ENVIRONMENT == 'true' }}; then
+            PROJECT_VERSION="build_#${{ github.run_number }}"
+          else
+            PROJECT_VERSION="${{ steps.latest_tag.outputs.tag }}"
+          fi
+
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "project_version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
+
+  build-project:
+    name: 📦 Build Project
+    needs: [info]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: 🔍 Check
+        id: check
+        shell: bash
+        run: |
+          OUTPUT_FORMAT=zip
+          ARTIFACT_FILE_NAME=${{needs.info.outputs.project_full_name}}.$OUTPUT_FORMAT
+
+          echo "output_format=$OUTPUT_FORMAT"
+          echo "artifact_file_name=$ARTIFACT_FILE_NAME"
+
+      - name: 📦 Make datapack distibutive
+        run: |
+          cd src/
+          git archive --format=${{steps.check.outputs.output_format}} --output ../${{steps.check.outputs.artifact_file_name}}
+
+      - name: 🔍 Check if artifact exist
+        id: check_artifact
+        shell: bash
+        run: |
+          if [ ! -f ${{steps.check.outputs.artifact_file_name}} ]; then
+            echo '::error::No value found for artifact `${{steps.check.outputs.artifact_file_name}}`.' && exit 1
+          fi
+          echo "✔️ Artifact has been found"
