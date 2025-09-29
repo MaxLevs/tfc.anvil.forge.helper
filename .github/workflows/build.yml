@@ -89,3 +89,10 @@ jobs:
             echo '::error::No value found for artifact `${{steps.check.outputs.artifact_file_name}}`.' && exit 1
           fi
           echo "✔️ Artifact has been found"
+
+      - name: 🚀 Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ${{ steps.check.outputs.artifact_file_name }}
+          path: ./build/datapack/${{ steps.check.outputs.artifact_file_name }}
+          if-no-files-found: error
