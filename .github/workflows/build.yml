@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           OUTPUT_FORMAT=zip
-          ARTIFACT_FILE_NAME=${{needs.info.outputs.project_full_name}}.$OUTPUT_FORMAT
+          ARTIFACT_FILE_NAME=${{ needs.info.outputs.project_full_name }}.$OUTPUT_FORMAT
 
           echo "output_format=$OUTPUT_FORMAT" >> $GITHUB_OUTPUT
           echo "artifact_file_name=$ARTIFACT_FILE_NAME" >> $GITHUB_OUTPUT
@@ -79,20 +79,20 @@ jobs:
       - name: 📦 Make datapack distibutive
         run: |
           cd src/
-          git archive --format=${{steps.check.outputs.output_format}} --output ../${{steps.check.outputs.artifact_file_name}} HEAD
+          git archive --format=${{ steps.check.outputs.output_format }} --output ../${{ steps.check.outputs.artifact_file_name }} HEAD
 
       - name: 🔍 Check if artifact exist
         id: check_artifact
         shell: bash
         run: |
-          if [ ! -f ${{steps.check.outputs.artifact_file_name}} ]; then
-            echo '::error::No value found for artifact `${{steps.check.outputs.artifact_file_name}}`.' && exit 1
+          if [ ! -f ${{ steps.check.outputs.artifact_file_name }} ]; then
+            echo '::error::No value found for artifact `${{ steps.check.outputs.artifact_file_name }}`.' && exit 1
           fi
           echo "✔️ Artifact has been found"
 
       - name: 🚀 Upload artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: ${{ steps.check.outputs.artifact_file_name }}
+          name: ${{ needs.info.outputs.project_full_name }}
           path: ${{ steps.check.outputs.artifact_file_name }}
           if-no-files-found: error
