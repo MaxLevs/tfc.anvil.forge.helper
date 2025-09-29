@@ -20,8 +20,8 @@ jobs:
     name: 🖥️ Project Info
     runs-on: ubuntu-latest
     outputs:
-      project_version: ${{ steps.check.outputs.project_version }}
       project_name: ${{ steps.check.outputs.project_name }}
+      project_version: ${{ steps.check.outputs.project_version }}
       project_full_name: ${{ steps.check.outputs.project_name }}-${{ steps.check.outputs.project_version }}
 
     steps:
@@ -73,8 +73,8 @@ jobs:
           OUTPUT_FORMAT=zip
           ARTIFACT_FILE_NAME=${{needs.info.outputs.project_full_name}}.$OUTPUT_FORMAT
 
-          echo "output_format=$OUTPUT_FORMAT"
-          echo "artifact_file_name=$ARTIFACT_FILE_NAME"
+          echo "output_format=$OUTPUT_FORMAT" >> $GITHUB_OUTPUT
+          echo "artifact_file_name=$ARTIFACT_FILE_NAME" >> $GITHUB_OUTPUT
 
       - name: 📦 Make datapack distibutive
         run: |
