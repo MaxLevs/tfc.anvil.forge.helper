@@ -79,7 +79,7 @@ jobs:
       - name: 📦 Make datapack distibutive
         run: |
           cd src/
-          git archive --format=${{steps.check.outputs.output_format}} --output ../${{steps.check.outputs.artifact_file_name}}
+          git archive --format=${{steps.check.outputs.output_format}} --output ../${{steps.check.outputs.artifact_file_name}} HEAD
 
       - name: 🔍 Check if artifact exist
         id: check_artifact
