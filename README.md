@@ -12,3 +12,7 @@ This datapack is an answer to the questions. It changes the anvil interface and 
 There are two ways to use this datapack:
 * To understand a forging mechanics, find your way to forge things and then disable it;
 * Just use permanently.
+
+## Installation
+
+Put archive into `resources` folder in minecraft instance forlder.
